@@ -18,15 +18,30 @@ type CSV struct{}
 func (c CSV) ReadLine(r io.Reader) (*string, error) {
 	buff := make([]byte, 1)
 	line := ""
+	lastchar := ""
+	inQuotes := false
 
 	for {
 		_, err := r.Read(buff)
 		char := string(buff[0])
 		if char == "\n" || char == "\r" || char == "\r\n" || err == io.EOF {
+			if inQuotes {
+				return nil, ErrQuote
+			}
 			return &line, err
 		}
 
+		if char == `"` {
+			if inQuotes && lastchar == `"` { // single quote inside the field
+				inQuotes = !inQuotes
+				continue
+			}
+
+			inQuotes = !inQuotes
+		}
+
 		line += char
+		lastchar = char
 	}
 }
 
