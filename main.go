@@ -11,6 +11,7 @@ import (
 type CSVParser interface {
 	ReadLine(r io.Reader) (*string, error)
 	GetField(n int) (string, error)
+	GetNumberOfFields() int
 }
 
 var (
@@ -87,6 +88,10 @@ func (c *CSV) GetField(n int) (string, error) {
 	return s, nil
 }
 
+func (c *CSV) GetNumberOfFields() int {
+	return strings.Count(c.line, ",") + 1
+}
+
 func NewCsv() *CSV {
 	return new(CSV)
 }
@@ -105,15 +110,12 @@ func main() {
 		_, err := CSVParser.ReadLine(file)
 		if err != nil {
 			if err == io.EOF {
-				field, _ := CSVParser.GetField(3)
-				fmt.Println(field)
 				break
 			}
 			fmt.Println("Error reading line:", err)
 			return
 		}
 
-		field, _ := CSVParser.GetField(3)
-		fmt.Println(field)
+		fmt.Println(CSVParser.GetNumberOfFields())
 	}
 }
