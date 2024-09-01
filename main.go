@@ -89,6 +89,9 @@ func (c *CSV) GetField(n int) (string, error) {
 }
 
 func (c *CSV) GetNumberOfFields() int {
+	if c.line == "" {
+		return 0
+	}
 	return strings.Count(c.line, ",") + 1
 }
 
@@ -102,7 +105,14 @@ func main() {
 		fmt.Println("Error opening file:", err)
 		return
 	}
+
 	defer file.Close()
+
+	fileName := string(file.Name())
+	if fileName[len(fileName)-4:] != ".csv" {
+		fmt.Println("Must be passed .csv file")
+		os.Exit(1)
+	}
 
 	CSVParser := NewCsv()
 
@@ -110,6 +120,7 @@ func main() {
 		_, err := CSVParser.ReadLine(file)
 		if err != nil {
 			if err == io.EOF {
+				fmt.Println(CSVParser.GetNumberOfFields())
 				break
 			}
 			fmt.Println("Error reading line:", err)
